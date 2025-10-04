@@ -17,7 +17,7 @@ spec:
     path: logstash
     helm:
       valueFiles:
-        - values.yml
+        - values.yaml
   syncPolicy:
     automated:
       prune: true
