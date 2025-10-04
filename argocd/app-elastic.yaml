@@ -17,7 +17,7 @@ spec:
     path: elasticsearch
     helm:
       valueFiles:
-        - values.yml
+        - values.yaml
   syncPolicy:
     automated:
       prune: true

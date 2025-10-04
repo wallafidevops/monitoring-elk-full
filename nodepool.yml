@@ -1,44 +1,45 @@
 apiVersion: karpenter.k8s.aws/v1
 kind: EC2NodeClass
 metadata:
-  name: monitoring
+  name: monitoring-elk
 spec:
-  role: "KarpenterNodeRole-cluster-prd" # replace with your cluster name
+  role: KarpenterNodeRole-cluster-prd
   amiSelectorTerms:
-    - alias: "al2023@latest"
+    - alias: al2023@latest
   subnetSelectorTerms:
     - tags:
-        karpenter.sh/discovery: "cluster-prd" # replace with your cluster name
+        karpenter.sh/discovery: cluster-prd
   securityGroupSelectorTerms:
     - tags:
-        karpenter.sh/discovery: "cluster-prd"
-  tags:
-    Name: prd-monitoring-v1
-    monitoring: "true" 
+        karpenter.sh/discovery: cluster-prd
   blockDeviceMappings:
     - deviceName: /dev/xvda
       ebs:
-        volumeSize: 30Gi          # ✔️ Tamanho do root volume
-        volumeType: gp3           # ✔️ Tipo do volume
-        encrypted: true           # ✔️ Sempre recomendo
-        deleteOnTermination: true            
-  metadataOptions:
-    httpEndpoint: enabled
-    httpProtocolIPv6: disabled
-    httpPutResponseHopLimit: 2
-    httpTokens: required  
+        volumeSize: 30Gi
+        volumeType: gp3
+        encrypted: true
+        deleteOnTermination: true
+  tags:
+    Name: prd-monitoring-v1
+    monitoring: "true"
 ---
-
 apiVersion: karpenter.sh/v1
 kind: NodePool
 metadata:
-  name: monitoring
+  name: monitoring-elk
 spec:
   limits:
-    cpu: 6
-    memory: 32Gi
+    cpu: 10
+    memory: 40Gi
   template:
+    metadata:
+      labels:
+        monitoring: "true"     # cria o label no nó
     spec:
+      taints:
+        - key: monitoring
+          value: "true"
+          effect: NoSchedule
       requirements:
         - key: kubernetes.io/arch
           operator: In
@@ -51,24 +52,11 @@ spec:
           values: ["spot"]
         - key: karpenter.k8s.aws/instance-category
           operator: In
-          values: ["t"]
-        # - key: karpenter.k8s.aws/instance-generation
-        #   operator: Gt
-        #   values: ["2"]
-        - key: monitoring
-          operator: In
-          values: ["true"]
-      taints:
-        - key: "monitoring"
-          value: "true"
-          effect: "NoSchedule"
+          values: ["t","c","m"]
       nodeClassRef:
         group: karpenter.k8s.aws
         kind: EC2NodeClass
-        name: monitoring
-      expireAfter: 720h # 30 * 24h = 720h
-  # limits:
-  #   cpu: 1000
+        name: monitoring-elk
   disruption:
     consolidationPolicy: WhenEmptyOrUnderutilized
-    consolidateAfter: 1m
+    consolidateAfter: 1m   # ajuste se quiser
