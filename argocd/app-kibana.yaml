@@ -5,9 +5,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: kibana
-  namespace: argocd 
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io  
+  namespace: argocd  
 spec:
   project: default
   destination:
@@ -20,12 +18,12 @@ spec:
     helm:
       valueFiles:
         - values.yaml
-  # syncPolicy:
-  #   automated:
-  #     prune: true
-  #     selfHeal: true
-  #   syncOptions:
-  #     - CreateNamespace=true
-  #     - ServerSideApply=true
-  #     - PrunePropagationPolicy=Foreground
-  #     - PruneLast=true
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - PrunePropagationPolicy=Foreground
+      - PruneLast=true
