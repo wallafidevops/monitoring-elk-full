@@ -1,0 +1,8 @@
+apiVersion: v2
+name: filebeat
+version: 0.1.0
+type: application
+dependencies:
+  - name: filebeat
+    version: "8.5.1"
+    repository: "https://helm.elastic.co"

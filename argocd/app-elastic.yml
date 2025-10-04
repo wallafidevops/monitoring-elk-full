@@ -1,0 +1,32 @@
+# =========================================================
+# Elasticsearch
+# =========================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: elasticsearch
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: efk
+  source:
+    repoURL: https://github.com/wallafidevops/monitoring-elk-full.git
+    targetRevision: main
+    path: elasticsearch
+    helm:
+      valueFiles:
+        - values.yml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - PrunePropagationPolicy=Foreground
+      - PruneLast=true
+
+
+
